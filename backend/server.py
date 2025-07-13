@@ -753,23 +753,28 @@ async def monitor_portfolios():
     while True:
         try:
             # Get all portfolios
-            portfolios = await db.portfolios.find().to_list(1000)
+            portfolios = await db.portfolios.find({}, {"_id": 0}).to_list(1000)
             
             for portfolio_data in portfolios:
-                portfolio = Portfolio(**portfolio_data)
-                
-                # Check for risk threshold breaches
-                if portfolio.risk_score > 80:
-                    alert = AlertModel(
-                        user_id=portfolio.user_id,
-                        alert_type="HIGH_RISK",
-                        message=f"Portfolio risk score is {portfolio.risk_score:.1f}. Consider rebalancing.",
-                        severity="high"
-                    )
-                    await db.alerts.insert_one(alert.dict())
-                
-                # Check for significant value changes
-                # (This would require comparing with previous values)
+                try:
+                    portfolio = Portfolio(**portfolio_data)
+                    
+                    # Check for risk threshold breaches
+                    if portfolio.risk_score > 80:
+                        alert = AlertModel(
+                            user_id=portfolio.user_id,
+                            alert_type="HIGH_RISK",
+                            message=f"Portfolio risk score is {portfolio.risk_score:.1f}. Consider rebalancing.",
+                            severity="high"
+                        )
+                        await db.alerts.insert_one(alert.dict())
+                    
+                    # Check for significant value changes
+                    # (This would require comparing with previous values)
+                    
+                except Exception as e:
+                    logging.error(f"Error processing portfolio {portfolio_data.get('id', 'unknown')}: {str(e)}")
+                    continue
                 
             await asyncio.sleep(300)  # Check every 5 minutes
             

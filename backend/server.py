@@ -732,12 +732,13 @@ async def get_dashboard_data(user_id: str):
         
         avg_risk_score = safe_float(total_risk_score / len(portfolios) if portfolios else 0)
         
-        return {
-            "portfolios": portfolios,
-            "risk_metrics": risk_metrics,
-            "sentiment_data": sentiment_data,
-            "yield_opportunities": yield_opportunities,
-            "alerts": alerts,
+        # Clean all data for JSON serialization
+        dashboard_data = {
+            "portfolios": clean_data_for_json(portfolios),
+            "risk_metrics": clean_data_for_json(risk_metrics),
+            "sentiment_data": clean_data_for_json(sentiment_data),
+            "yield_opportunities": clean_data_for_json(yield_opportunities),
+            "alerts": clean_data_for_json(alerts),
             "summary": {
                 "total_portfolio_value": total_portfolio_value,
                 "portfolio_count": len(portfolios),
@@ -745,6 +746,8 @@ async def get_dashboard_data(user_id: str):
                 "total_alerts": len(alerts)
             }
         }
+        
+        return dashboard_data
         
     except Exception as e:
         logging.error(f"Error fetching dashboard data: {str(e)}")

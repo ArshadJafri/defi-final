@@ -477,7 +477,8 @@ async def create_portfolio(request: PortfolioRequest):
         )
         
         # Save to database
-        await db.portfolios.insert_one(portfolio.dict())
+        portfolio_dict = portfolio.dict()
+        await db.portfolios.insert_one(portfolio_dict)
         
         return portfolio
         

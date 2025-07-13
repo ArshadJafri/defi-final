@@ -337,6 +337,12 @@ async def fetch_reddit_sentiment(symbol: str):
         logging.error(f"Error fetching Reddit sentiment: {str(e)}")
         return None
 
+def safe_float(value, default=0.0):
+    """Convert value to safe float, handling NaN and infinity"""
+    if pd.isna(value) or np.isinf(value):
+        return default
+    return float(value)
+
 def calculate_portfolio_metrics(portfolio: Portfolio, historical_data: List[Dict]):
     """Calculate advanced portfolio risk metrics"""
     try:

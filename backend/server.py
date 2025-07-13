@@ -707,7 +707,7 @@ async def get_dashboard_data(user_id: str):
 async def get_user_alerts(user_id: str):
     """Get alerts for a user"""
     try:
-        alerts = await db.alerts.find({"user_id": user_id}).sort("triggered_at", -1).to_list(100)
+        alerts = await db.alerts.find({"user_id": user_id}, {"_id": 0}).sort("triggered_at", -1).to_list(100)
         return alerts
     except Exception as e:
         logging.error(f"Error fetching alerts: {str(e)}")

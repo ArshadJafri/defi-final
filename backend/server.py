@@ -479,7 +479,10 @@ async def create_portfolio(request: PortfolioRequest):
         token_balances = await fetch_wallet_balance(request.wallet_address)
         
         # Get symbols for price data
-        symbols = [token["symbol"] for token in token_balances]
+        symbols = [token["symbol"] for token in token_balances if token["balance"] > 0]
+        
+        if not symbols:
+            symbols = ["BTC"]  # Default to prevent empty symbol error
         
         # Fetch market data
         market_data = await fetch_coinmarketcap_data(symbols)

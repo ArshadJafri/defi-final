@@ -490,7 +490,7 @@ async def create_portfolio(request: PortfolioRequest):
 async def get_portfolio(portfolio_id: str):
     """Get portfolio details"""
     try:
-        portfolio = await db.portfolios.find_one({"id": portfolio_id})
+        portfolio = await db.portfolios.find_one({"id": portfolio_id}, {"_id": 0})
         if not portfolio:
             raise HTTPException(status_code=404, detail="Portfolio not found")
         return portfolio

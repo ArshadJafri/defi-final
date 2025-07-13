@@ -503,7 +503,7 @@ async def analyze_portfolio_risk(portfolio_id: str, request: RiskAssessmentReque
     """Perform comprehensive risk analysis on a portfolio"""
     try:
         # Get portfolio
-        portfolio_data = await db.portfolios.find_one({"id": portfolio_id})
+        portfolio_data = await db.portfolios.find_one({"id": portfolio_id}, {"_id": 0})
         if not portfolio_data:
             raise HTTPException(status_code=404, detail="Portfolio not found")
         

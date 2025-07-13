@@ -231,7 +231,10 @@ async def fetch_wallet_balance(wallet_address: str):
 async def analyze_sentiment_openai(text: str, symbol: str):
     """Analyze sentiment using OpenAI GPT"""
     try:
-        response = openai.ChatCompletion.create(
+        from openai import OpenAI
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": f"You are a financial sentiment analysis expert. Analyze the sentiment of the following text about {symbol} cryptocurrency. Return only a JSON object with 'sentiment' (score from -1 to 1), 'confidence' (0 to 1), and 'reasoning' (brief explanation)."},

@@ -671,19 +671,19 @@ async def get_dashboard_data(user_id: str):
     """Get comprehensive dashboard data for a user"""
     try:
         # Get user's portfolios
-        portfolios = await db.portfolios.find({"user_id": user_id}).to_list(100)
+        portfolios = await db.portfolios.find({"user_id": user_id}, {"_id": 0}).to_list(100)
         
         # Get recent risk metrics
-        risk_metrics = await db.risk_metrics.find().sort("timestamp", -1).limit(10).to_list(10)
+        risk_metrics = await db.risk_metrics.find({}, {"_id": 0}).sort("timestamp", -1).limit(10).to_list(10)
         
         # Get recent sentiment data
-        sentiment_data = await db.sentiment_data.find().sort("timestamp", -1).limit(20).to_list(20)
+        sentiment_data = await db.sentiment_data.find({}, {"_id": 0}).sort("timestamp", -1).limit(20).to_list(20)
         
         # Get yield opportunities
-        yield_opportunities = await db.yield_opportunities.find().sort("timestamp", -1).limit(10).to_list(10)
+        yield_opportunities = await db.yield_opportunities.find({}, {"_id": 0}).sort("timestamp", -1).limit(10).to_list(10)
         
         # Get recent alerts
-        alerts = await db.alerts.find({"user_id": user_id}).sort("triggered_at", -1).limit(10).to_list(10)
+        alerts = await db.alerts.find({"user_id": user_id}, {"_id": 0}).sort("triggered_at", -1).limit(10).to_list(10)
         
         return {
             "portfolios": portfolios,

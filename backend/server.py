@@ -366,34 +366,52 @@ def calculate_portfolio_metrics(portfolio: Portfolio, historical_data: List[Dict
         df['returns'] = df['value'].pct_change().dropna()
         returns = df['returns'].values
         
-        # Calculate metrics
-        volatility = np.std(returns) * np.sqrt(252)  # Annualized volatility
-        mean_return = np.mean(returns) * 252  # Annualized return
+        # Remove any NaN or infinite values
+        returns = returns[~(np.isnan(returns) | np.isinf(returns))]
+        
+        if len(returns) < 2:
+            return RiskMetrics(
+                portfolio_id=portfolio.id,
+                value_at_risk=0.0,
+                conditional_var=0.0,
+                max_drawdown=0.0,
+                sharpe_ratio=0.0,
+                sortino_ratio=0.0,
+                volatility=0.0,
+                skewness=0.0,
+                kurtosis=0.0
+            )
+        
+        # Calculate metrics with safe float conversion
+        volatility = safe_float(np.std(returns) * np.sqrt(252), 0.0)  # Annualized volatility
+        mean_return = safe_float(np.mean(returns) * 252, 0.0)  # Annualized return
         
         # Value at Risk (95% confidence level)
-        var_95 = np.percentile(returns, 5) * portfolio.total_value_usd
+        var_95 = safe_float(np.percentile(returns, 5) * portfolio.total_value_usd, 0.0)
         
         # Conditional VaR (Expected Shortfall)
-        cvar_95 = np.mean(returns[returns <= np.percentile(returns, 5)]) * portfolio.total_value_usd
+        percentile_5 = np.percentile(returns, 5)
+        cvar_returns = returns[returns <= percentile_5]
+        cvar_95 = safe_float(np.mean(cvar_returns) * portfolio.total_value_usd if len(cvar_returns) > 0 else 0.0, 0.0)
         
         # Maximum Drawdown
         cumulative_returns = (1 + pd.Series(returns)).cumprod()
         running_max = cumulative_returns.expanding().max()
         drawdown = (cumulative_returns - running_max) / running_max
-        max_drawdown = drawdown.min()
+        max_drawdown = safe_float(drawdown.min(), 0.0)
         
         # Sharpe Ratio (assuming risk-free rate of 2%)
         risk_free_rate = 0.02
-        sharpe_ratio = (mean_return - risk_free_rate) / volatility if volatility > 0 else 0
+        sharpe_ratio = safe_float((mean_return - risk_free_rate) / volatility if volatility > 0 else 0, 0.0)
         
         # Sortino Ratio
         downside_returns = returns[returns < 0]
-        downside_volatility = np.std(downside_returns) * np.sqrt(252) if len(downside_returns) > 0 else 0
-        sortino_ratio = (mean_return - risk_free_rate) / downside_volatility if downside_volatility > 0 else 0
+        downside_volatility = safe_float(np.std(downside_returns) * np.sqrt(252) if len(downside_returns) > 0 else 0, 0.0)
+        sortino_ratio = safe_float((mean_return - risk_free_rate) / downside_volatility if downside_volatility > 0 else 0, 0.0)
         
         # Skewness and Kurtosis
-        skewness = pd.Series(returns).skew()
-        kurtosis = pd.Series(returns).kurtosis()
+        skewness = safe_float(pd.Series(returns).skew(), 0.0)
+        kurtosis = safe_float(pd.Series(returns).kurtosis(), 0.0)
         
         return RiskMetrics(
             portfolio_id=portfolio.id,

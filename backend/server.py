@@ -709,6 +709,16 @@ async def get_dashboard_data(user_id: str):
         # Get recent alerts
         alerts = await db.alerts.find({"user_id": user_id}, {"_id": 0}).sort("triggered_at", -1).limit(10).to_list(10)
         
+        # Calculate safe summary metrics
+        total_portfolio_value = 0.0
+        total_risk_score = 0.0
+        
+        for portfolio in portfolios:
+            total_portfolio_value += safe_float(portfolio.get("total_value_usd", 0))
+            total_risk_score += safe_float(portfolio.get("risk_score", 0))
+        
+        avg_risk_score = safe_float(total_risk_score / len(portfolios) if portfolios else 0)
+        
         return {
             "portfolios": portfolios,
             "risk_metrics": risk_metrics,
@@ -716,9 +726,9 @@ async def get_dashboard_data(user_id: str):
             "yield_opportunities": yield_opportunities,
             "alerts": alerts,
             "summary": {
-                "total_portfolio_value": sum(p.get("total_value_usd", 0) for p in portfolios),
+                "total_portfolio_value": total_portfolio_value,
                 "portfolio_count": len(portfolios),
-                "avg_risk_score": sum(p.get("risk_score", 0) for p in portfolios) / len(portfolios) if portfolios else 0,
+                "avg_risk_score": avg_risk_score,
                 "total_alerts": len(alerts)
             }
         }

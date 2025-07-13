@@ -462,7 +462,10 @@ async def create_portfolio(request: PortfolioRequest):
             ))
         
         # Calculate basic risk metrics
-        risk_score = min(100, max(0, 50 + sum(abs(token.change_24h) for token in portfolio_tokens) / len(portfolio_tokens)))
+        if portfolio_tokens:
+            risk_score = min(100, max(0, 50 + sum(abs(token.change_24h) for token in portfolio_tokens) / len(portfolio_tokens)))
+        else:
+            risk_score = 50.0  # Default risk score when no tokens
         
         # Create portfolio
         portfolio = Portfolio(

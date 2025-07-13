@@ -343,6 +343,19 @@ def safe_float(value, default=0.0):
         return default
     return float(value)
 
+def clean_data_for_json(data):
+    """Recursively clean data structure to ensure JSON serialization"""
+    if isinstance(data, dict):
+        return {key: clean_data_for_json(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [clean_data_for_json(item) for item in data]
+    elif isinstance(data, float):
+        return safe_float(data)
+    elif pd.isna(data):
+        return None
+    else:
+        return data
+
 def calculate_portfolio_metrics(portfolio: Portfolio, historical_data: List[Dict]):
     """Calculate advanced portfolio risk metrics"""
     try:

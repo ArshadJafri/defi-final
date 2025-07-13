@@ -19,7 +19,6 @@ import requests
 import openai
 from textblob import TextBlob
 import redis
-import aioredis
 import statistics
 from collections import defaultdict
 import time

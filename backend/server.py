@@ -768,5 +768,3 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-    if redis_client:
-        await redis_client.close()

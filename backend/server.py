@@ -152,25 +152,24 @@ class SentimentAnalysisRequest(BaseModel):
     symbols: List[str]
     sources: List[str] = ["news", "reddit"]
 
-# Utility Functions
-async def get_redis_client():
-    global redis_client
-    if redis_client is None:
-        redis_client = aioredis.from_url("redis://localhost:6379")
-    return redis_client
+# Simple in-memory cache
+cache_store = {}
 
 async def cache_get(key: str):
     try:
-        redis_client = await get_redis_client()
-        value = await redis_client.get(key)
-        return json.loads(value) if value else None
+        if key in cache_store:
+            data, expiry = cache_store[key]
+            if time.time() < expiry:
+                return data
+            else:
+                del cache_store[key]
+        return None
     except:
         return None
 
 async def cache_set(key: str, value: Any, expire: int = 300):
     try:
-        redis_client = await get_redis_client()
-        await redis_client.setex(key, expire, json.dumps(value))
+        cache_store[key] = (value, time.time() + expire)
     except:
         pass
 

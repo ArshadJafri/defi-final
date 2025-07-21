@@ -820,11 +820,12 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],  # use the exact origin
+    allow_credentials=True,  # required if you're using cookies/auth
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Configure logging
 logging.basicConfig(

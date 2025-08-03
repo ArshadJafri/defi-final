@@ -820,12 +820,7 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://defi-final-ng3spn17a-arshad-jafris-projects.vercel.app",
-        "https://defi-final-5btnkosw4-arshad-jafris-projects.vercel.app"
-    ],
-    allow_origin_regex=r"https://defi-final-.*-arshad-jafris-projects.vercel.app",  # Allow all Vercel preview deployments
+    allow_origins=["*"],  # WARNING: For diagnostic purposes only. Allows all origins.
     allow_credentials=True,  # required if you're using cookies/auth
     allow_methods=["*"],
     allow_headers=["*"],
